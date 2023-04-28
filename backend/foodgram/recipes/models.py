@@ -10,6 +10,9 @@ class Tag(models.Model):
     color = models.CharField(max_length=7, unique=True)
     slug = models.SlugField(unique=True)
 
+    def __str__(self):
+        return self.name
+
 
 class Ingredient(models.Model):
     name = models.CharField(max_length=128, verbose_name='Название')
@@ -31,30 +34,33 @@ class Recipe(models.Model):
     name = models.CharField(max_length=300)
     image = models.ImageField()
     text = models.TextField()
-    ingredients = models.ManyToManyField(Ingredient, verbose_name='Ингридиент')
+    ingredients = models.ManyToManyField(
+        Ingredient,
+        through='RecipeIngredient',
+        through_fields=('recipe', 'ingredient'),
+        verbose_name='Ингредиенты'
+    )
     tags = models.ManyToManyField(Tag)
     cooking_time = models.DurationField(verbose_name='Время приготовления')
 
+    def __str__(self):
+        return self.name
 
-class RecipeIngridient(models.Model):
-    name = models.CharField(
-        max_length=128,
-        verbose_name='Название'
-    )
+
+class RecipeIngredient(models.Model):
     amount = models.IntegerField(
         verbose_name='Количество'
     )
-    measurement_unit = models.CharField(
-        max_length=128,
-        verbose_name='Измерение'
-        )
-    recipe = models.ForeignKey(
-        Recipe,
-        on_delete=models.CASCADE,
-        verbose_name='Рецепт'
-    ),
     ingredient = models.ForeignKey(
         Ingredient,
         on_delete=models.CASCADE,
         verbose_name='Ингридиент'
     )
+    recipe = models.ForeignKey(
+        Recipe,
+        on_delete=models.CASCADE,
+        verbose_name='Рецепт'
+    )
+
+    def __str__(self):
+        return f'{self.ingredient} в {self.recipe}'

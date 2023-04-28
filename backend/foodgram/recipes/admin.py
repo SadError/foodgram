@@ -1,12 +1,18 @@
 from django.contrib import admin
 
-from .models import Tag, Ingredient, Recipe, RecipeIngridient
+from .models import Tag, Ingredient, Recipe, RecipeIngredient
+
+
+class RecipeIngredientInline(admin.TabularInline):
+    model = RecipeIngredient
 
 
 class RecipeAdmin(admin.ModelAdmin):
     # На странице рецепта вывести общее число добавлений этого рецепта в избранное - ЕЩЕ НЕ СДЕЛАНО
     list_display = ('name', 'author',)
     list_filter = ('name', 'author', 'tags',)
+    filter_horizontal = ('ingredients',)
+    inlines = [RecipeIngredientInline,]
 
 
 class IngredientAdmin(admin.ModelAdmin):
@@ -17,4 +23,4 @@ class IngredientAdmin(admin.ModelAdmin):
 admin.site.register(Recipe, RecipeAdmin)
 admin.site.register(Ingredient, IngredientAdmin)
 admin.site.register(Tag)
-admin.site.register(RecipeIngridient)
+admin.site.register(RecipeIngredient)
