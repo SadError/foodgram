@@ -31,4 +31,3 @@ social-auth-core==4.4.1
 sorl-thumbnail==12.9.0
 sqlparse==0.4.3
 tzdata==2023.3
-urllib3==1.26.15
