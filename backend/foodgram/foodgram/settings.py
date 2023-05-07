@@ -15,7 +15,7 @@ SECRET_KEY = 'django-insecure-8nzwhy_ke^!a18*+w3kbvdrf09ah9e^u02qnx8r9x61jv$$nry
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['localhost', '62.113.106.188', 'backend',]
+ALLOWED_HOSTS = ['127.0.0.1', 'localhost', '62.113.106.188', 'backend',]
 
 CSRF_TRUSTED_ORIGINS = ['http://localhost', 'http://backend', 'http://62.113.106.188']
 
@@ -36,6 +36,7 @@ INSTALLED_APPS = [
     'recipes',
     'users',
     'api',
+    'colorfield',
 ]
 
 MIDDLEWARE = [

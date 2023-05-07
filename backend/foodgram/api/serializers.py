@@ -165,6 +165,15 @@ class RecipeCreateUpdateSerializer(serializers.ModelSerializer):
             )
         return super().update(instance, validated_data)
 
+    def to_representation(self, obj):
+        """Возвращаем прдеставление в таком же виде, как и GET-запрос."""
+        self.fields.pop('ingredients')
+        representation = super().to_representation(obj)
+        representation['ingredients'] = RecipeIngredientSerializer(
+            RecipeIngredient.objects.filter(recipe=obj).all(), many=True
+        ).data
+        return representation
+
     class Meta:
         model = Recipe
         fields = (
