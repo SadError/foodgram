@@ -1,12 +1,12 @@
+from api.serializers import (FollowSerializer, SubscribersSerializer,
+                             UserSerializer)
 from django.shortcuts import get_object_or_404
-from rest_framework import viewsets
+from rest_framework import status, viewsets
 from rest_framework.decorators import action
-from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
-from rest_framework import status
+from rest_framework.response import Response
 
-from api.serializers import UserSerializer, SubscribersSerializer, FollowSerializer
-from .models import User, Subscribers
+from .models import Subscribers, User
 
 app_name = 'users'
 
@@ -36,16 +36,17 @@ class UserViewSet(viewsets.ModelViewSet):
             instance = get_object_or_404(Subscribers, author=pk, user=user)
             instance.delete()
             return Response(status=status.HTTP_204_NO_CONTENT)
-        
+
     @action(
-        methods=['get'],
+        methods=['GET'],
         detail=False,
         permission_classes=[IsAuthenticated]
     )
     def subscriptions(self, request):
         user = request.user
-        qs = user.following.all()
-        serializer = SubscribersSerializer(qs,
+        queryset = User.objects.filter(following__user=user)
+        pages = self.paginate_queryset(queryset)
+        serializer = SubscribersSerializer(pages,
                                            many=True,
                                            context={'request': request})
-        return Response(serializer.data)
+        return self.get_paginated_response(serializer.data)

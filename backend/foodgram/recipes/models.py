@@ -1,7 +1,6 @@
-from django.db import models
-from django.contrib.auth import get_user_model
 from colorfield.fields import ColorField
-
+from django.contrib.auth import get_user_model
+from django.db import models
 
 User = get_user_model()
 
@@ -73,11 +72,13 @@ class Favorite(models.Model):
         User,
         on_delete=models.CASCADE,
         verbose_name='Пользователь',
+        related_name='favorites'
     )
     recipe = models.ForeignKey(
         Recipe,
         on_delete=models.CASCADE,
-        verbose_name='Рецепт'
+        verbose_name='Рецепт',
+        related_name='favorited'
     )
 
     class Meta:

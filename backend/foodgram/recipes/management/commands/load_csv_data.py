@@ -1,5 +1,6 @@
-import csv
 import codecs
+import csv
+
 from django.core.management import BaseCommand
 
 from ...models import Ingredient
