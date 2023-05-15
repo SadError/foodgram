@@ -13,7 +13,7 @@ from users.permissions import AuthorOrReadOnly
 
 from .filters import IngredientFilter, RecipeFilter
 from .pagination import PageLimitPagination
-from .serializers import (FavoriteListSerializer, IngredientSerializer,
+from .serializers import (FavoriteSerializer, IngredientSerializer,
                           RecipeCreateUpdateSerializer,
                           RecipeIngredientSerializer, RecipeSerializer,
                           TagSerializer)
@@ -40,7 +40,7 @@ class RecipeViewSet(viewsets.ModelViewSet):
                             status=status.HTTP_400_BAD_REQUEST)
         recipe = get_object_or_404(Recipe, pk=pk)
         instance = model.objects.create(user=user, recipe=recipe)
-        serializer = FavoriteListSerializer(instance)
+        serializer = FavoriteSerializer(instance=instance.recipe)
         return Response(data=serializer.data, status=status.HTTP_201_CREATED)
 
     def delete_from_favorite(self, model, user, pk):

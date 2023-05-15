@@ -4,6 +4,16 @@ from rest_framework import serializers, status
 from rest_framework.exceptions import ValidationError
 from users.models import Subscribers, User
 
+from djoser.serializers import UserCreateSerializer, UserSerializer
+
+
+class UserSignUpSerializer(UserCreateSerializer):
+    """Сериализатор для регистрации пользователей."""
+    class Meta:
+        model = User
+        fields = ('email', 'id', 'username', 'first_name',
+                  'last_name', 'password')
+
 
 class FavoriteSerializer(serializers.ModelSerializer):
     """Сериализатор для списка избранных рецептов"""
@@ -14,16 +24,7 @@ class FavoriteSerializer(serializers.ModelSerializer):
         fields = ('id', 'name', 'image', 'cooking_time')
 
 
-class FavoriteListSerializer(serializers.Serializer):
-    def to_representation(self, instance):
-        request = self.context.get('request')
-        return FavoriteSerializer(
-            instance.recipe,
-            context={'request': request}
-        ).data
-
-
-class UserSerializer(serializers.ModelSerializer):
+class UsersSerializer(UserSerializer):
     """Сериализатор списка пользователей."""
     is_subscribed = serializers.SerializerMethodField(read_only=True)
 
@@ -60,11 +61,7 @@ class SubscribersSerializer(serializers.ModelSerializer):
         return serializer.data
 
     def get_is_subscribed(self, obj):
-        return (
-            self.context.get('request').user.is_authenticated
-            and Subscribers.objects.filter(user=self.context['request'].user,
-                                           author=obj).exists()
-        )
+        return obj.id in self.context['subscriptions']
 
     class Meta:
         model = User
@@ -97,10 +94,9 @@ class FollowSerializer(serializers.ModelSerializer):
         return data
 
     def to_representation(self, instance):
-        request = self.context.get('request')
         return SubscribersSerializer(
             instance.author,
-            context={'request': request}
+            context=self.context
         ).data
 
 
@@ -198,16 +194,12 @@ class RecipeCreateUpdateSerializer(serializers.ModelSerializer):
 
 class RecipeSerializer(serializers.ModelSerializer):
     """Сериализатор для списка рецептов"""
-    ingredients = serializers.SerializerMethodField()
-    author = UserSerializer(read_only=True)
+    ingredients = RecipeIngredientSerializer(many=True, read_only=True,
+                                             source='recipeingredients')
+    author = UsersSerializer(read_only=True)
     tags = TagSerializer(many=True)
     is_favorited = serializers.SerializerMethodField()
     is_in_shopping_cart = serializers.SerializerMethodField(read_only=True)
-
-    def get_ingredients(self, obj):
-        return RecipeIngredientSerializer(
-            RecipeIngredient.objects.filter(recipe=obj).all(), many=True
-        ).data
 
     def get_is_favorited(self, obj):
         request = self.context.get('request')
