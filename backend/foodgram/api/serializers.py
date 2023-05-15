@@ -29,11 +29,10 @@ class UsersSerializer(UserSerializer):
     is_subscribed = serializers.SerializerMethodField(read_only=True)
 
     def get_is_subscribed(self, obj):
-        return (
-            self.context.get('request').user.is_authenticated
-            and Subscribers.objects.filter(user=self.context['request'].user,
-                                           author=obj).exists()
-        )
+        subscriptions = self.context.get('subscriptions')
+        if subscriptions is None:
+            return False
+        return obj.id in subscriptions
 
     class Meta:
         model = User
@@ -61,7 +60,10 @@ class SubscribersSerializer(serializers.ModelSerializer):
         return serializer.data
 
     def get_is_subscribed(self, obj):
-        return obj.id in self.context['subscriptions']
+        subscriptions = self.context.get('subscriptions')
+        if subscriptions is None:
+            return False
+        return obj.id in subscriptions
 
     class Meta:
         model = User
