@@ -1,5 +1,4 @@
-from api.serializers import (FollowSerializer, SubscribersSerializer,
-                             UsersSerializer, UserSignUpSerializer)
+from api.serializers import (FollowSerializer, SubscribersSerializer)
 from django.shortcuts import get_object_or_404
 from rest_framework import status
 from rest_framework.decorators import action
@@ -18,18 +17,14 @@ class CustomUserViewSet(UserViewSet):
     pagination_class = PageLimitPagination
     lookup_field = 'pk'
 
-    def get_serializer_class(self):
-        if self.request.method in ['POST', 'PUT', 'PATCH']:
-            return UserSignUpSerializer
-        return UsersSerializer
-
     def get_serializer_context(self):
-        return {
-            'request': self.request,
-            'format': self.format_kwarg,
-            'view': self,
-            'subscriptions': set(Subscribers.objects.filter(user_id=self.request.user).values_list('author_id', flat=True))
-        }
+        context = super().get_serializer_context()
+        if not self.request.user.is_authenticated:
+            return context
+        subscriptions = Subscribers.objects.filter(user_id=self.request.user)
+        subscriptions = subscriptions.values_list('author_id', flat=True)
+        context['subscriptions'] = set(subscriptions)
+        return context
 
     @action(
         methods=['post', 'delete'],
@@ -62,7 +57,8 @@ class CustomUserViewSet(UserViewSet):
         user = request.user
         queryset = User.objects.filter(following__user=user)
         page = self.paginate_queryset(queryset)
-        serializer = SubscribersSerializer(page,
-                                           many=True,
-                                           context=self.get_serializer_context())
+        serializer = SubscribersSerializer(
+            page,
+            many=True,
+            context=self.get_serializer_context())
         return self.get_paginated_response(serializer.data)

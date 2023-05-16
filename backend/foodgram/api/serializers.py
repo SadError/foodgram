@@ -11,7 +11,7 @@ class UserSignUpSerializer(UserCreateSerializer):
     """Сериализатор для регистрации пользователей."""
     class Meta:
         model = User
-        fields = ('email', 'id', 'username', 'first_name',
+        fields = ('email', 'username', 'first_name',
                   'last_name', 'password')
 
 
@@ -29,10 +29,15 @@ class UsersSerializer(UserSerializer):
     is_subscribed = serializers.SerializerMethodField(read_only=True)
 
     def get_is_subscribed(self, obj):
+        user = self.context.get('request').user
+        if not user.is_authenticated:
+            return False
         subscriptions = self.context.get('subscriptions')
         if subscriptions is None:
             return False
-        return obj.id in subscriptions
+        if hasattr(obj, 'id') and obj.id is not None:
+            return obj.id in subscriptions
+        return False
 
     class Meta:
         model = User
@@ -60,10 +65,15 @@ class SubscribersSerializer(serializers.ModelSerializer):
         return serializer.data
 
     def get_is_subscribed(self, obj):
+        user = self.context.get('request').user
+        if not user.is_authenticated:
+            return False
         subscriptions = self.context.get('subscriptions')
         if subscriptions is None:
             return False
-        return obj.id in subscriptions
+        if hasattr(obj, 'id') and obj.id is not None:
+            return obj.id in subscriptions
+        return False
 
     class Meta:
         model = User
