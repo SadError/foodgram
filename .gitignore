@@ -137,3 +137,5 @@ dmypy.json
 
 frontend/build/
 frontend/node_modules/
+
+db.sqlite3
