@@ -8,10 +8,13 @@ class RecipeIngredientInline(admin.TabularInline):
 
 
 class RecipeAdmin(admin.ModelAdmin):
-    list_display = ('name', 'author',)
+    list_display = ('name', 'author', 'favorites_amount')
     list_filter = ('name', 'author', 'tags',)
     filter_horizontal = ('ingredients',)
     inlines = [RecipeIngredientInline,]
+
+    def favorites_amount(self, obj):
+        return obj.favorited.count()
 
 
 class IngredientAdmin(admin.ModelAdmin):
