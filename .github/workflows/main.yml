@@ -36,7 +36,8 @@ jobs:
           passphrase: ${{ secrets.PASSPHRASE }}
           script: |
             docker-compose stop
-            docker-compose rm backend
+            docker-compose rm root_backend_1
+            rm -f .env
             touch .env
             echo SECRET_KEY=${{ secrets.SECRET_KEY }} >> .env
             echo DB_ENGINE=${{ secrets.DB_ENGINE }} >> .env
