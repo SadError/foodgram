@@ -28,5 +28,3 @@ docker-compose exec <container_id> python manage.py migrate
 docker-compose exec <container_id> python manage.py createsuperuser
 docker-compose exec <container_id> python manage.py collectstatic --no-input
 ```
-### Документация
-Документация доступна по адресу: http://62.113.106.188/api/docs/redoc/
